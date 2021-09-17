@@ -1,0 +1,74 @@
+name "camera_spinnaker"
+# Optionally declare the version number
+# version "0.1"
+
+# If new data types need to be defined, they have to be put in a separate C++
+# header, and this header will be loaded here
+import_types_from "camera_spinnakerTypes.hpp"
+# Finally, it is pretty common that headers are directly loaded from an external
+# library. In this case, the library must be first used (the name is the
+# library's pkg-config name) and then the header can be used. Following Rock
+# conventions, a common use-case would be:
+using_library "camera_spinnaker" # Spinnaker driver
+using_library "frame_helper" # Image Frames
+using_library "opencv" #opencv library
+
+# If this project uses data types that are defined in other oroGen projects,
+# these projects should be imported there as well.
+import_types_from "std"
+import_types_from "base"
+import_types_from "frame_helper/Calibration.h"
+import_types_from "frame_helper/FrameHelperTypes.h"
+
+# Declare a new task context (i.e., a component)
+#
+# The corresponding C++ class can be edited in tasks/Task.hpp and
+# tasks/Task.cpp, and will be put in the camera_spinnaker namespace.
+task_context "Task" do
+    # This is the default from now on, and should not be removed. Rock will
+    # transition to a setup where all components use a configuration step.
+    needs_configuration
+
+    #***************************
+    #**** Driver Properties ****
+    #***************************
+    property "config", "camera_spinnaker::Config"
+        doc "Camera configuration"
+
+    property("undistort","bool",false).
+        doc 'true => undistort the image before it is writen to the output port'
+
+    property("calibration_parameters","frame_helper/CameraCalibration").
+        doc 'Calibration parameters for the camera, which are used to undistort and are added as attributes to the frames'
+
+    property("output_format", "/base/samples/frame/frame_mode_t", :MODE_UNDEFINED).
+       doc "The camera_format is converted into this format before it is written to the output port "
+           "Set it to MODE_UNDEFINED if you want to disable the conversion and the camera_format shall be used"
+
+    property("resize_algorithm","/frame_helper/ResizeAlgorithm",:INTER_LINEAR).
+        doc "resize algorithm which is used to scale the frame before it is written to the output port. "
+            "allowed values are INTER_LINEAR, INTER_NEAREST, INTER_AREA, INTER_CUBIC, INTER_LANCZOS4, BAYER_RESIZE"
+
+    property("scale_x", "double", 1).
+       doc "scale factor for the x direction which is used to scale the image before it is written to the output_port. "
+
+    property("scale_y", "double" ,1).
+       doc "scale factor for the y direction which is used to scale the image before it is written to the output_port. "
+
+    property("offset_x",   "int", 0).
+       doc "the offset to be used on the left margin in case of scaling"
+
+    property("offset_y",   "int", 0).
+       doc "the offset to be used on the left margin in case of scaling"
+
+    #******************************
+    #******* Output Ports *********
+    #******************************
+    output_port('image_frame', ro_ptr('base::samples::frame::Frame')).
+        doc 'Output image frame'
+
+    reports :NO_CAMERA, :CONFIGURE_ERROR, :PROCESSING_ERROR
+
+    periodic(0.0)
+end
+
