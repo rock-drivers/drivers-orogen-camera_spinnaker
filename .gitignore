@@ -1,5 +1,6 @@
 templates/*
 .orogen/*
+.vscode
 *~
 .*.swp
 build/*
