@@ -127,7 +127,7 @@ void Task::updateHook()
     TaskBase::updateHook();
 
     //while(((RTT::TaskContext*)this)->getActivity()->trigger())
-    //while(this->isActive())
+    while(this->isActive())
     {
         try
         {

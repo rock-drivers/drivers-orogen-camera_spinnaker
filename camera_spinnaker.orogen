@@ -69,6 +69,6 @@ task_context "Task" do
 
     reports :NO_CAMERA, :CONFIGURE_ERROR, :PROCESSING_ERROR
 
-    periodic(0.0)
+    #periodic(0.0)
 end
 
