@@ -131,24 +131,31 @@ void Task::updateHook()
     {
         try
         {
+            this->spinnaker.grabImage();
+
             /** Get the current image **/
             base::samples::frame::Frame *frame_ptr = this->camera_frame.write_access();
             frame_ptr->image.clear();
-            this->spinnaker.grabImage(*frame_ptr, "spinnaker");
-            /*std::cout<<"[time] "<<frame_ptr->time.toString()<<" img size "<<frame_ptr->size.width<<" x "<<frame_ptr->size.height<<" px_size: "<<frame_ptr->pixel_size <<" data size: "<<frame_ptr->image.size()
-            <<" img mode "<<frame_ptr->frame_mode<<std::endl;*/
-            this->camera_frame.reset(frame_ptr);
-
-            /** Should we process the image **/
-            if(this->process_image)
+            if (this->spinnaker.retrieveFrame(*frame_ptr))
             {
-                this->processImage();
-                _image_frame.write(this->output_frame);
+                /*std::cout<<"[time] "<<frame_ptr->time.toString()<<" img size "<<frame_ptr->size.width<<" x "<<frame_ptr->size.height<<" px_size: "<<frame_ptr->pixel_size <<" data size: "<<frame_ptr->image.size()
+                <<" img mode "<<frame_ptr->frame_mode<<std::endl;*/
+                this->camera_frame.reset(frame_ptr);
+                frame_ptr->received_time = base::Time::now();
+
+                /** Should we process the image **/
+                if(this->process_image)
+                {
+                    this->processImage();
+                    _image_frame.write(this->output_frame);
+                }
+                else
+                {
+                    _image_frame.write(this->camera_frame);
+                }
             }
             else
-            {
-                _image_frame.write(this->camera_frame);
-            }
+                RTT::log(RTT::Error) << "[ERROR] NOT RETREIVED FRAME" << RTT::endlog();
         }
         catch (const std::runtime_error& e)
         {

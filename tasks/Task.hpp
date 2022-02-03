@@ -8,6 +8,7 @@
 /** Frame helper **/
 #include <frame_helper/FrameHelper.h>
 #include <opencv2/opencv.hpp>
+#include <boost/circular_buffer.hpp>
 
 #include "camera_spinnaker/TaskBase.hpp"
 
